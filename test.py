@@ -27,12 +27,12 @@ class HospitalManagementSystem:
     def __init__(self):
         self.patients = []
         self.doctors = []
-        self.appointments = []  # New list to store appointments
+        self.appointments = []
 
     def load_data_from_files(self):
         self.load_patients_from_file('patients.csv')
         self.load_doctors_from_file('doctors.csv')
-        self.load_appointments_from_file('appointments.csv')  # New method
+        self.load_appointments_from_file('appointments.csv')
 
     def load_patients_from_file(self, filename):
         try:
@@ -54,7 +54,7 @@ class HospitalManagementSystem:
         except FileNotFoundError:
             print(f"File {filename} not found. No data loaded.")
 
-    def load_appointments_from_file(self, filename):  # New method
+    def load_appointments_from_file(self, filename):
         try:
             with open(filename, 'r') as file:
                 reader = csv.reader(file)
@@ -67,7 +67,7 @@ class HospitalManagementSystem:
     def save_data_to_files(self):
         self.save_patients_to_file('patients.csv')
         self.save_doctors_to_file('doctors.csv')
-        self.save_appointments_to_file('appointments.csv')  # New method
+        self.save_appointments_to_file('appointments.csv')
 
     def save_patients_to_file(self, filename):
         with open(filename, 'w', newline='') as file:
@@ -81,67 +81,34 @@ class HospitalManagementSystem:
             for doctor in self.doctors:
                 writer.writerow([doctor.name, doctor.speciality, doctor.availability])
 
-    def save_appointments_to_file(self, filename):  # New method
+    def save_appointments_to_file(self, filename):
         with open(filename, 'w', newline='') as file:
             writer = csv.writer(file)
             for appointment in self.appointments:
                 writer.writerow(appointment)
 
-    def add_patient_record(self, patient):
-        self.patients.append(patient)
-        print("Patient record added successfully.")
-        self.save_patients_to_file('patients.csv')
-
-    def delete_patient_record(self, patient_name):
-        for patient in self.patients:
-            if patient.name == patient_name:
-                self.patients.remove(patient)
-                print(f"Patient {patient_name} record deleted successfully.")
-                self.save_patients_to_file('patients.csv')
-                return print(f"Patient {patient_name} not found.")
-    def search_patient(self, patient_name):
-        for patient in self.patients:
-            if patient.name == patient_name:
-                patient.display_record()
-                return
-        print(f"Patient {patient_name} not found.")
-
-    def add_doctor_profile(self, doctor):
-        self.doctors.append(doctor)
-        print("Doctor profile added successfully.")
-        self.save_doctors_to_file('doctors.csv')
-
-    def delete_doctor_profile(self, doctor_name):
-        for doctor in self.doctors:
-            if doctor.name == doctor_name:
-                self.doctors.remove(doctor)
-                print(f"Doctor {doctor_name}'s profile deleted successfully.")
-                self.save_doctors_to_file('doctors.csv')
-                return
-        print(f"Doctor {doctor_name} not found.")
-
-    def display_doctor_profiles(self):
-        if not self.doctors:
-            print("No doctor profiles found.")
-            return
-        for doctor in self.doctors:
-            doctor.display_profile()
-
     def search_doctors_by_speciality(self, speciality):
         found = False
+        doctors_available = []
         for doctor in self.doctors:
             if doctor.speciality == speciality:
-                doctor.display_profile()
                 found = True
-        if not found:
-            print(f"No doctors found with speciality: {speciality}")
+                doctors_available.append(doctor)
 
-    def check_doctor_availability(self, doctor_name):
-        for doctor in self.doctors:
-            if doctor.name == doctor_name:
-                print(f"Doctor {doctor_name} is available on {doctor.availability}.")
-                return
-        print(f"Doctor {doctor_name} not found or availability not specified.")
+        if found:
+            print("\nAvailable doctors:")
+            for doctor in doctors_available:
+                doctor.display_profile()
+
+            # Prompt for booking only if doctors were found
+            choice = input("\nDo you want to book an appointment (y/n): ")
+            if choice.lower() == 'y':
+                doctor_name = input("Enter doctor name to book appointment: ")
+                patient_name = input("Enter patient name: ")
+                date = input("Enter date for appointment: ")
+                self.book_appointment(doctor_name, patient_name, date)
+            else:
+               print(f"No doctors found with speciality: {speciality}")
 
     def book_appointment(self, doctor_name, patient_name, date):
         # Check if doctor exists
@@ -153,7 +120,7 @@ class HospitalManagementSystem:
 
         if not doctor_found:
             print(f"Doctor {doctor_name} not found.")
-            return
+            return  # Handle error or prompt user again (optional)
 
         # Add appointment to appointments list
         self.appointments.append((doctor_name, patient_name, date))
@@ -161,17 +128,17 @@ class HospitalManagementSystem:
         self.save_appointments_to_file('appointments.csv')  # Save appointment
 
 def admin_mode(hospital):
-    while True:
-        print("\nAdmin Mode:")
-        print("1. Add patient record")
-        print("2. Delete patient record")
-        print("3. Search patient by name")
-        print("4. Add doctor profile")
-        print("5. Delete Doctor profile")
-        print("6. Exit")
-        choice = int(input("Enter your choice: "))
+        while True:
+          print("\nAdmin Mode:")
+          print("1. Add patient record")
+          print("2. Delete patient record")
+          print("3. Search patient by name")
+          print("4. Add doctor profile")
+          print("5. Delete Doctor profile")
+          print("6. Exit")
+          choice = int(input("Enter your choice: "))
 
-        if choice == 1:
+          if choice == 1:
             name = input("Enter patient name: ")
             date = input("Enter date: ")
             doctor_name = input("Enter doctor name: ")
@@ -179,28 +146,29 @@ def admin_mode(hospital):
             patient = Patient(name, date, doctor_name, problem)
             hospital.add_patient_record(patient)
 
-        elif choice == 2:
+        # ... other admin mode functionalities (unchanged) ...
+          elif choice == 2:
             patient_name = input("Enter patient name to delete record: ")
             hospital.delete_patient_record(patient_name)
 
-        elif choice == 3:
+          elif choice == 3:
             patient_name = input("Enter patient name to search: ")
             hospital.search_patient(patient_name)
 
-        elif choice == 4:
+          elif choice == 4:
             name = input("Enter doctor name: ")
             speciality = input("Enter speciality: ")
             availability = input("Enter availability: ")
             doctor = Doctor(name, speciality, availability)
             hospital.add_doctor_profile(doctor)
 
-        elif choice == 5:
+          elif choice == 5:
             doctor_name = input("Enter doctor name to delete profile: ")
             hospital.delete_doctor_profile(doctor_name)
 
-        elif choice == 6:
+          elif choice == 6:
             break
-        else:
+          else:
             print("Invalid choice. Please choose again.")
 
 def user_mode(hospital):
@@ -211,7 +179,6 @@ def user_mode(hospital):
         print("3. Check doctor availability")
         print("4. Book appointments")
         print("5. Exit")
-
         choice = int(input("Enter your choice: "))
 
         if choice == 1:
@@ -226,10 +193,8 @@ def user_mode(hospital):
             hospital.check_doctor_availability(doctor_name)
 
         elif choice == 4:
-            doctor_name = input("Enter doctor name for appointment: ")
-            patient_name = input("Enter patient name: ")
-            date = input("Enter date for appointment: ")
-            hospital.book_appointment(doctor_name, patient_name, date)
+            speciality = input("Enter speciality to search for appointments: ")
+            hospital.search_doctors_by_speciality(speciality)
 
         elif choice == 5:
             break
